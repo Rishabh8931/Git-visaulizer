@@ -81,8 +81,6 @@ function Terminal({ dispatch }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-       
-
      
     </TerminalInsides>
   );

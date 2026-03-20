@@ -15,7 +15,7 @@ const Container = styled.div`
 const Section = styled.div`
   flex: 1;
   border-right: 1px solid #ccc;
-  padding: 10px;
+  padding: 5px;
 
   &:last-child {
     border-right: none;
