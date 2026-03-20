@@ -24,7 +24,7 @@ const Section = styled.div`
 
 function App() {
  const [state , dispatch] = useReducer(gitReducer, initialState)
- console.log(state)
+ 
 
   return (
     <Container>

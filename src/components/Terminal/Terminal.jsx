@@ -39,28 +39,32 @@ function Terminal({ dispatch }) {
     inputRef.current?.focus();
   }
 
-
-
-  function handleEnter() {
-    if (!input.trim()) return;
-
-    //  displaying the terminal history
-    setHistory((history) => [...history, `>${input}`]);
-
-    /* converting terminal inputs to the action and passing to the dispatcher */
-    const result = parseCommand(input);
-
-    if (result.error) {
-      setHistory((prev) => [...prev, result.error]);
-    } else {
-      dispatch(result);
-      setHistory((prev) => [...prev, "✔ Command executed"]);
+  /** logic unit of the terminal */
+   const handleCommand = (cmd) => {
+     if (!cmd.trim()) return;
+     console.log(cmd)
+       const action = parseCommand(cmd);
+  
+        if (action.error) {
+      setHistory((prev) => [...prev, `> ${cmd}`, `${action.error}`]);
+      return;
     }
-    /** setting input field empty */
-    setInput("");
+    dispatch(action);
+    setHistory((prev) => [
+      ...prev,
+      `> ${cmd}`,
+      "✔ Command executed",
+    ]);
+   };
 
-  }
-
+ /** control unit of the terminal*/
+ 
+ const handleKeyDown = (e) => {
+    if(e.key == "Enter") {
+      handleCommand(input);
+      setInput("");
+    }
+ }
   return (
     <TerminalInsides ref={terminalRef} onClick={focusInput}>
       {/*  displaying all terminail history */}
@@ -71,19 +75,15 @@ function Terminal({ dispatch }) {
       </div>
 
       {/** taking input and passing to dispatcher */}
-      <InputWrapper>
-        <InputContainer>
-          <HiddenText> {input || " "} </HiddenText>
-          <Cursor/>
           <Input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleEnter}
+            onKeyDown={handleKeyDown}
           />
-        </InputContainer>
+       
 
-      </InputWrapper>
+     
     </TerminalInsides>
   );
 }
@@ -105,54 +105,21 @@ const TerminalInsides = styled.div`
 // input field of terminal 
 
 const Input = styled.input`
-  position: absolute;
-  top: 0;
-  left: 0;
+ 
   background: transparent;
   color: #0f0;
   border: none;
   outline: none;
   font-size: medium;
   font-family: monospace;
-  caret-color: transparent;
+
 `
 
-//  blinking cursor
-const Cursor = styled.span`
-  position: absolute;
-  top: 2px;
-  left: 0;
 
-  width: 8px;
-  height: 18px;
-  background: #0f0;
-
-  animation: blink 1s step-start infinite;
-
-  @keyframes blink {
-    50% {
-      opacity: 0;
-    }
-  }
-`;
   
 
-const InputWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  position: relative;
-`
-const InputContainer = styled.div`
-  position: relative;
-  display: inline-block;
-`
 
-const HiddenText = styled.span`
-  visibility: hidden;
-  white-space: pre;
-  font-size: medium;
-  font-family: monospace;
-`;
+
 
 
 
