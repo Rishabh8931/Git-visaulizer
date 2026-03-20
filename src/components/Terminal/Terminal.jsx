@@ -1,5 +1,7 @@
  import { useCallback, useEffect, useState } from 'react';
 import {styled} from 'styled-components';
+import {parseCommand} from "../../utils/commandParser.js"
+
 
 
 function Terminal({ dispatch }) {
@@ -21,12 +23,25 @@ useEffect(()=>{
 },[history]);
 
 
+
  function handleEnter(){
    if(!input.trim()) return;
-   //
-
-    setHistory((prev) => [...prev,`>${Input}`]);
+  
+    //  displaying the terminal history
+    setHistory((history) => [...history,`>${input}`]);
+      
+    /* converting terminal inputs to the action and passing to the dispatcher */
+    const result = parseCommand(input);
+   
+    if(result.error){
+      setHistory((prev) => [...prev, result.error]);
+    } else {
+      dispatch(result);
+      setHistory((prev) => [...prev, "✔ Command executed"]);
+    }
+    /** setting input field empty */
     setInput("");
+  
  }
   
   return (
@@ -34,12 +49,13 @@ useEffect(()=>{
       {/*  displaying all terminail history */}
       <div>
       {history.map((line,index) => {
-         return <div key={index}>{line}</div>
+         return <div key={index}>{`>>%>${line}`}</div>
       })}
       </div>
 
        {/** taking input and passing to dispatcher */}
       <Input 
+      value={input}
        onChange={(e) =>setInput(e.target.value)}
         onKeyDown= {
           (e) => {
@@ -60,6 +76,7 @@ const TerminalInsides = styled.div`
     display: flex;
     flex-direction: column;
     font-size: medium;
+    overflow: auto;
   
 `
 const Input = styled.input`
