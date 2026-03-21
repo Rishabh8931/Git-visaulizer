@@ -1,36 +1,49 @@
-
+import { clearLocalstorage } from "./localStorage";
 
 
 export function parseCommand(input) {
   const parts = input.trim().split(" ");
-
-  if (input === "git init") {
-    return { type: "INIT" };
+  
+    // clearing terminal
+    if(parts[0] === "clear") {
+       clearLocalstorage("terminal-history");
+       return {type : "CLEAR_HISTORY"}
+    }
+  if (parts[0] !== "git") {
+    return { error: "Command not found" };
   }
 
-  if (parts[0] === "git" && parts[1] === "add") {
-    return { type: "ADD", payload: parts[2] };
+  switch (parts[1]) {
+    case "init":
+      return { type: "INIT" };
+
+    case "add":
+      return { type: "ADD", payload: parts[2] };
+
+    case "commit": {
+      const msgIndex = parts.indexOf("-m");
+      if (msgIndex === -1) {
+        return { error: "Missing commit message" };
+      }
+
+      const message = parts
+        .slice(msgIndex + 1)
+        .join(" ")
+        .replace(/\"/g, "");
+
+      return { type: "COMMIT", payload: message };
+    }
+
+    case "branch":
+      return { type: "BRANCH", payload: parts[2] };
+
+    case "checkout":
+      return { type: "CHECKOUT", payload: parts[2] };
+
+    case "push":
+      return { type: "PUSH" };
+
+    default:
+      return { error: "Command not found" };
   }
-
-  if (parts[0] === "git" && parts[1] === "commit") {
-    const msgIndex = parts.indexOf("-m");
-    if (msgIndex === -1) return { error: "Missing commit message" };
-
-    const message = parts.slice(msgIndex + 1).join(" ").replace(/\"/g, "");
-    return { type: "COMMIT", payload: message };
-  }
-
-  if (parts[0] === "git" && parts[1] === "branch") {
-    return { type: "BRANCH", payload: parts[2] };
-  }
-
-  if (parts[0] === "git" && parts[1] === "checkout") {
-    return { type: "CHECKOUT", payload: parts[2] };
-  }
-
-  if (input === "git push") {
-    return { type: "PUSH" };
-  }
-
-  return { error: "Command not found" };
 }

@@ -49,6 +49,12 @@ function Terminal({ dispatch }) {
       setHistory((prev) => [...prev, `> ${cmd}`, `${action.error}`]);
       return;
     }
+     /** clearing terminal  */
+     if(action.type === "CLEAR_HISTORY") {
+       setHistory([]);
+       return;
+     }
+
     dispatch(action);
     setHistory((prev) => [
       ...prev,
