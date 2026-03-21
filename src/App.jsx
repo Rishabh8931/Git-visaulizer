@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import { gitReducer } from "./state/gitReducer";
 import { initialState } from "./state/initialState";
 
@@ -23,7 +23,20 @@ const Section = styled.div`
 `;
 
 function App() {
- const [state , dispatch] = useReducer(gitReducer, initialState)
+   // getting the states
+ const savedState = localStorage.getItem("git-state");
+
+ const [state , dispatch] = useReducer(
+        gitReducer,
+        savedState ? JSON.parse(savedState) : initialState
+ );
+
+
+
+//  saving the states in local storage
+useEffect(() => {
+  localStorage.setItem("git-state", JSON.stringify(state))
+},[state])
  
 
   return (

@@ -42,7 +42,7 @@ function Terminal({ dispatch }) {
   /** logic unit of the terminal */
    const handleCommand = (cmd) => {
      if (!cmd.trim()) return;
-     console.log(cmd)
+     
        const action = parseCommand(cmd);
   
         if (action.error) {
