@@ -9,6 +9,9 @@ function Terminal({ dispatch }) {
 
   //  terminal action passing ro dispather
   const [input, setInput] = useState("");
+  //  up and down key history navigation
+  const [commandHistory, setCommandHistory] = useState([]);
+const [historyIndex, setHistoryIndex] = useState(null);
 
 
   // save the terminal history in localStorage
