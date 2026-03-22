@@ -4,7 +4,7 @@ export function clearLocalstorage(name) {
 
 export function getItem(name) {
     const saved = localStorage.getItem(name)
-    return JSON.parse(saved);
+     return JSON.parse(saved);
 }
 
 export function setItem(name , data) {

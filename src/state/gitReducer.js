@@ -16,9 +16,9 @@ export function gitReducer(state, action) {
 
       if (!fileName) return state;
 
-      const fileExists = state.workingDirectory.find(
+      const fileExists = state.workingDirectory ? state.workingDirectory.find(
         (f) => f.name === fileName
-      );
+      ) : null;
 
       if (!fileExists) return state; // file not found
 
@@ -44,7 +44,6 @@ export function gitReducer(state, action) {
 
     // 🔹 COMMIT
     case "COMMIT": {
-      // safety check
       if (!state.stagingArea || state.stagingArea.length === 0) {
         return state;
       }
@@ -54,9 +53,9 @@ export function gitReducer(state, action) {
       const newCommit = {
         id: newCommitId,
         message: action.payload,
-        parent: state.HEAD,
-        branch: state.currentBranch,
-        files: [...state.stagingArea], // ✅ clone (important)
+        parent: state.HEAD, // 👈 key for graph
+        branch: state.currentBranch, // 👈 key for branching
+        files: state.stagingArea.map((f) => ({ ...f })), // deep copy
       };
 
       return {
@@ -68,7 +67,7 @@ export function gitReducer(state, action) {
         HEAD: newCommitId,
         branches: {
           ...state.branches,
-          [state.currentBranch]: newCommitId,
+          [state.currentBranch]: newCommitId, // 👈 move branch pointer
         },
         stagingArea: [],
         workingDirectory: state.workingDirectory.map((file) => ({
@@ -79,19 +78,19 @@ export function gitReducer(state, action) {
     }
 
     // 🔹 BRANCH
-    case "BRANCH": {
-      const branchName = action.payload;
+   case "BRANCH": {
+  const branchName = action.payload;
 
-      if (!branchName || state.branches[branchName]) return state;
+  if (!branchName || state.branches[branchName]) return state;
 
-      return {
-        ...state,
-        branches: {
-          ...state.branches,
-          [branchName]: state.HEAD,
-        },
-      };
-    }
+  return {
+    ...state,
+    branches: {
+      ...state.branches,
+      [branchName]: state.HEAD, // 👈 correct
+    },
+  };
+}
 
     // 🔹 CHECKOUT
     case "CHECKOUT": {
@@ -106,7 +105,11 @@ export function gitReducer(state, action) {
         ...state,
         currentBranch: branch,
         HEAD: commitId,
-        workingDirectory: commit ? [...commit.files] : [],
+        workingDirectory: commit ? commit.files.map((f) => ({
+            ...f,
+            status: "tracked",
+          })) : state.workingDirectory,
+
         stagingArea: [],
       };
     }

@@ -29,7 +29,7 @@ function App() {
 
  const [state , dispatch] = useReducer(
         gitReducer,
-        savedState ? savedState : initialState
+        savedState ? savedState: initialState
  );
 
 //  console.log("staging area:" , state.stagingArea)
@@ -37,7 +37,7 @@ function App() {
 
 //  saving the states in local storage
 useEffect(() => {
-  setItem("git-state" , JSON.stringify(state))
+  setItem("git-state" , state)
 },[state])
  
 

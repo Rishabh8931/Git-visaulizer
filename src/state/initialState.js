@@ -13,6 +13,8 @@ export const initialState = {
 
   commits: {},
 
+  commitOrder: [],
+
   branches: {
     main: null,
   },
@@ -26,5 +28,8 @@ export const initialState = {
     branches: {
       main: null,
     },
+    HEAD: null,
   },
+
+  currentPath: "~/project",
 };
