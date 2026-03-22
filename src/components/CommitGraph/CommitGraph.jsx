@@ -1,8 +1,8 @@
-import { Stage, Layer, Circle, Line, Text,Group } from "react-konva";
+import { Stage, Layer, Circle, Line, Text, Group } from "react-konva";
 import AnimatedNode from "../animations/AnimatedNodes";
 import AnimatedLine from "../animations/AnimatedLine";
 
-function CommitGraph({ commits, branches }) {
+function CommitGraph({ commits, branches, HEAD }) {
   // ✅ Safe fallback
   const commitList = Object.values(commits || {});
 
@@ -16,7 +16,7 @@ function CommitGraph({ commits, branches }) {
   });
 
   return (
-    
+
     <Stage width={500} height={600}>
       <Layer>
 
@@ -28,6 +28,7 @@ function CommitGraph({ commits, branches }) {
           const parentIndex = commitList.findIndex(
             (c) => c.id === commit.parent
           );
+
 
           if (parentIndex === -1) return null;
 
@@ -53,6 +54,7 @@ function CommitGraph({ commits, branches }) {
         {/*  DRAW COMMITS (circles) */}
         {commitList.map((commit, index) => {
           if (!commit || !commit.id) return null;
+          const isHead = commit.id === HEAD;
 
           const x = branchX[commit.branch] || 200;
           const y = index * 80 + 50;
@@ -64,6 +66,8 @@ function CommitGraph({ commits, branches }) {
                 x={x}
                 y={y}
                 color="blue"
+                stroke={isHead ? "orange" : "black"}
+                strokeWidth={isHead ? 4 : 1}
               />
 
               {/* Commit label (C1, C2) */}
@@ -83,11 +87,43 @@ function CommitGraph({ commits, branches }) {
                 fontSize={15}
                 fontFamily="Poppins"
               />
-            </Group>
-          );
-        })}
 
-      </Layer>
+              {/*  HEAD POINTER */}
+              {isHead && (
+                <>
+                  {/* Arrow Line */}
+                  <Text
+                    x={x - 10 }
+                    y={y - 7}
+                    text=">"
+                    fontSize={14}
+                    fill="red"
+                    fontStyle="bold"
+
+                  />
+                  <Line
+                    points={[x - 60, y, x - 15, y]}
+                    stroke="red"
+                    strokeWidth={2}
+                  />
+
+                  {/* HEAD Text */}
+                  <Text
+                    x={x - 100}
+                    y={y - 7}
+                    text="HEAD"
+                    fontSize={14}
+                    fill="red"
+                    fontStyle="bold"
+
+                  />
+                   </>
+              )}
+                </Group>
+              )
+
+        })}
+ </Layer>
     </Stage>
   );
 }

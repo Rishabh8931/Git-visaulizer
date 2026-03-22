@@ -1,7 +1,7 @@
 import { Line } from "react-konva";
 import { useEffect, useState } from "react";
 
-function AnimatedLine({ points }) {
+function AnimatedLine({ points , stroke, strokeWidth }) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -32,8 +32,9 @@ function AnimatedLine({ points }) {
   return (
     <Line
       points={[x1, y1, currentX, currentY]}
-      stroke="gray"
-      strokeWidth={2}
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+       
     />
   );
 }

@@ -24,6 +24,7 @@ function WorkingDirectory({ state }) {
         <CommitGraph
           commits={state.commits}
           branches={state.branches}
+          HEAD = {state.HEAD}
         />
       </div>
 
