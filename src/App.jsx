@@ -32,6 +32,7 @@ function App() {
         savedState ? savedState : initialState
  );
 
+//  console.log("staging area:" , state.stagingArea)
 
 
 //  saving the states in local storage

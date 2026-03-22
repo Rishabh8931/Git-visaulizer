@@ -11,7 +11,8 @@ function Terminal({ dispatch }) {
   const [input, setInput] = useState("");
   //  up and down key history navigation
   const [commandHistory, setCommandHistory] = useState([]);
-const [historyIndex, setHistoryIndex] = useState(null);
+  const [cmdHstryIdx, setCmdHstryIdx] = useState(null);
+  
 
 
   // save the terminal history in localStorage
@@ -33,7 +34,7 @@ const [historyIndex, setHistoryIndex] = useState(null);
 
       terminalRef.current.scrollTo({
         top: terminalRef.current.scrollHeight,
-        behaviour: "smooth"
+        behavior: "smooth"
       })
     }
   }, [history])
@@ -47,6 +48,8 @@ const [historyIndex, setHistoryIndex] = useState(null);
   /** logic unit of the terminal */
    const handleCommand = (cmd) => {
      if (!cmd.trim()) return;
+      setCommandHistory((prev) => [...prev, input]);
+     
      
        const action = parseCommand(cmd);
   
@@ -68,14 +71,46 @@ const [historyIndex, setHistoryIndex] = useState(null);
     ]);
    };
 
+
+
  /** control unit of the terminal*/
  
  const handleKeyDown = (e) => {
+
     if(e.key == "Enter") {
       handleCommand(input);
       setInput("");
     }
+
+  // Arrow Up
+    if(e.key == "ArrowUp") {
+      e.preventDefault();
+      setCmdHstryIdx((prev) => {
+        if(commandHistory.length == 0) return null;
+        const newIndex = prev === null ? commandHistory.length-1 : Math.max(prev-1, 0);
+        setInput(commandHistory[newIndex]);
+        return newIndex;
+      })
+
+    }
+
+    // Arrow down
+
+    if(e.key === "ArrowDown") {
+      e.preventDefault();
+       setCmdHstryIdx((prev) => {
+           if(prev === null) return null;
+
+           const newIndex = prev +1 > commandHistory.length? null : prev+1;
+
+           setInput(newIndex === null ? "" : commandHistory[newIndex]);
+           return newIndex;
+       })
+    }
+    
  }
+
+
   return (
     <TerminalInsides ref={terminalRef} onClick={focusInput}>
       {/*  displaying all terminail history */}
