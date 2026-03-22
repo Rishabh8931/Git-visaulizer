@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { styled } from 'styled-components';
 import { parseCommand } from "../../utils/commandParser.js"
+import { getItem, setItem } from '../../utils/localStorage.js';
 
 
 
@@ -12,13 +13,14 @@ function Terminal({ dispatch }) {
 
   // save the terminal history in localStorage
   const [history, setHistory] = useState(() => {
-    const saved = localStorage.getItem("terminal-history");
-    return saved ? JSON.parse(saved) : [];
+    const saved = getItem("terminal-history")
+    return saved ? saved : [];
   });
 
   // saving every history
+
   useEffect(() => {
-    localStorage.setItem("terminal-history", JSON.stringify(history));
+    setItem("terminal-history", history)
   }, [history]);
 
   // scrolling effect
@@ -118,14 +120,6 @@ const Input = styled.input`
   font-family: monospace;
 
 `
-
-
-  
-
-
-
-
-
 
 
 export default Terminal;

@@ -6,6 +6,7 @@ import styled from "styled-components";
 import Terminal from "./components/Terminal/Terminal";
 import WorkingDirectory from "./components/WorkingDirectory/WorkingDirectory";
 import RemoteRepository from "./components/RemoteRepository/RemoteRepository";
+import { getItem, setItem } from "./utils/localStorage";
 
 const Container = styled.div`
   display: flex;
@@ -24,18 +25,18 @@ const Section = styled.div`
 
 function App() {
    // getting the states
- const savedState = localStorage.getItem("git-state");
+ const savedState = getItem("git-state");
 
  const [state , dispatch] = useReducer(
         gitReducer,
-        savedState ? JSON.parse(savedState) : initialState
+        savedState ? savedState : initialState
  );
 
 
 
 //  saving the states in local storage
 useEffect(() => {
-  localStorage.setItem("git-state", JSON.stringify(state))
+  setItem("git-state" , JSON.stringify(state))
 },[state])
  
 
