@@ -1,6 +1,11 @@
 {
   "name": "git-visualizer",
-  "private": true,
+  "author": {
+    "name": "Rishabh Pal",
+    "email": "rishabh8931872407@gmail.components",
+    "url": "https://github.com/Rishabh8931"
+  },
+  "private": false,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
