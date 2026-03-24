@@ -5,7 +5,7 @@ function AnimatedNode({ x, y, color, stroke,strokeWidht }) {
   const [scale, setScale] = useState(0);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setScale(1), 500);
+    const timeout = setTimeout(() => setScale(1), 50);
     return () => clearTimeout(timeout);
   }, []);
 
