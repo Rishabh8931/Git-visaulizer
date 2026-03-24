@@ -2,7 +2,7 @@ import CommitGraph from "../CommitGraph/CommitGraph";
 
 function WorkingDirectory({ state }) {
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column"  , scrollBehavior : "auto"}}>
       
       {/* Header */}
       <h3>Local Repository</h3>

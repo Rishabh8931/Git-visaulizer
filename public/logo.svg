@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <style>
+      .bg-circle { fill: #4a90e2; } /* Blue background circle */
+      .branch-line { stroke: white; stroke-width: 4px; fill: none; } /* White lines for branches */
+      .commit-node { fill: #50e3c2; } /* Green/Cyan for commit nodes */
+      .feature-node { fill: #f5a623; } /* Orange for feature commit node */
+    </style>
+  </defs>
+  
+  <circle class="bg-circle" cx="50" cy="50" r="48"/> <path class="branch-line" d="M15,50 L85,50"/> 
+  <circle class="commit-node" cx="30" cy="50" r="6"/> <circle class="commit-node" cx="70" cy="50" r="6"/> <path class="branch-line" d="M30,50 C38,65 62,65 70,50"/> <circle class="feature-node" cx="50" cy="62" r="5"/> </svg>
