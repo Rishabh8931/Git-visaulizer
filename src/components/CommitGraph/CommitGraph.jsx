@@ -2,11 +2,53 @@ import { Stage, Layer, Circle, Line, Text, Group } from "react-konva";
 import AnimatedNode from "../animations/AnimatedNodes";
 import AnimatedLine from "../animations/AnimatedLine";
 
+import { useRef,useState } from "react";
+
 function CommitGraph({ commits, branches, HEAD }) {
-  // ✅ Safe fallback
+ // zoom-draggable navigation
+ const stageRef = useRef(null);
+ const [stageState, setStageState] = useState({
+  scale:1,
+  x:0,
+  y:0,
+ })
+
+ const handleWheel = (e) => {
+  e.pvt.preventDefault();
+  
+  const stage = stageRef.current;
+  const scaleBy = 1.1;
+
+  const oldScale = stage.scaleX();
+const pointer = stage.getPointerPosition();
+
+const mousePointTo = {
+  x : (pointer.x-stage.x())/oldScale,
+  y: (pointer.y - stage.y())/oldScale,
+};
+ const newScale =
+    e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
+    
+    setStageState({
+      scale : newScale,
+        x: pointer.x - mousePointTo.x * newScale,
+    y: pointer.y - mousePointTo.y * newScale,
+    })
+ }
+
+ // reset view
+ const resetView = () => {
+  setStageState({
+    scale: 1,
+    x: 0,
+    y: 0,
+  });
+};
+
+  //  Safe fallback
   const commitList = Object.values(commits || {});
 
-  // 🧠 Branch X positions
+  //  Branch X positions
   const branchX = {};
   let branchIndex = 0;
 
@@ -17,7 +59,18 @@ function CommitGraph({ commits, branches, HEAD }) {
 
   return (
 
-    <Stage width={500} height={600}>
+   <Stage
+  ref={stageRef}
+  width={600}
+  height={600}
+  draggable
+  scaleX={stageState.scale}
+  scaleY={stageState.scale}
+  x={stageState.x}
+  y={stageState.y}
+  onWheel={handleWheel}
+>
+
       <Layer>
 
         {/*  DRAW LINES (parent connections) */}

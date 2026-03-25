@@ -11,6 +11,9 @@ import { getItem, setItem } from "./utils/localStorage";
 const Container = styled.div`
   display: flex;
   height: 100vh;
+  width: 100vw;
+  overflow: auto;
+  flex-direction: row;
 `;
 
 const Section = styled.div`
