@@ -12,3 +12,8 @@ export function setItem(name , data) {
      localStorage.setItem(name , result);
      return;
 }
+
+export  function resetCommits() {
+    localStorage.clear();
+    window.location.reload();
+}

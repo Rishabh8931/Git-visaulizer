@@ -3,6 +3,7 @@ import AnimatedNode from "../animations/AnimatedNodes";
 import AnimatedLine from "../animations/AnimatedLine";
 
 import { useRef, useState } from "react";
+import Reset from "../ResetButton/Reset";
 
 function CommitGraph({ commits, branches, HEAD }) {
   // zoom-draggable navigation
@@ -65,7 +66,24 @@ function CommitGraph({ commits, branches, HEAD }) {
   return (
     <>
 
-      <button onClick={resetView}>Reset view</button>
+     <div
+      style={
+        {
+          display : "flex",
+          justifyContent : "space-between"
+        }
+      }
+     >
+       <button 
+       style={
+        {
+          cursor : "pointer"
+        }
+       }
+      onClick={resetView}>Reset view</button>
+
+      <Reset/>
+     </div>
 
       <Stage
         ref={stageRef}

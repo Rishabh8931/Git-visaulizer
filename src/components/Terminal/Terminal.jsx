@@ -5,6 +5,7 @@ import { getItem, setItem } from '../../utils/localStorage.js';
 
 
 
+
 function Terminal({ dispatch }) {
 
   //  terminal action passing ro dispather
@@ -113,6 +114,7 @@ function Terminal({ dispatch }) {
 
   return (
     <TerminalInsides ref={terminalRef} onClick={focusInput}>
+      
       {/*  displaying all terminail history */}
       <div>
         {history.map((line, index) => {

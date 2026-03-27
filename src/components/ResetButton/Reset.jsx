@@ -1,9 +1,14 @@
 import React from 'react'
-import { clearLocalstorage } from '../../utils/localStorage'
+import { resetCommits } from '../../utils/localStorage'
 
 function Reset() {
+
   return (
-    <div>Reset</div>
+   <button
+    onClick={resetCommits}
+   >
+    Reset
+   </button>
   )
 }
 
