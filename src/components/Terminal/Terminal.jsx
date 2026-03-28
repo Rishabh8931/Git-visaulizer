@@ -1,165 +1,185 @@
-import { useRef, useEffect, useState } from 'react';
-import { styled } from 'styled-components';
-import { parseCommand } from "../../utils/commandParser.js"
-import { getItem, setItem } from '../../utils/localStorage.js';
-
-
-
+import { useRef, useEffect, useState } from "react";
+import { styled } from "styled-components";
+import { parseCommand } from "../../utils/commandParser.js";
+import { getItem, setItem } from "../../utils/localStorage.js";
 
 function Terminal({ dispatch }) {
 
-  //  terminal action passing ro dispather
+  /** input state */
   const [input, setInput] = useState("");
-  //  up and down key history navigation
+
+  /** command history for arrow navigation */
   const [commandHistory, setCommandHistory] = useState([]);
   const [cmdHstryIdx, setCmdHstryIdx] = useState(null);
-  
 
-
-  // save the terminal history in localStorage
+  /** terminal output history */
   const [history, setHistory] = useState(() => {
-    const saved = getItem("terminal-history")
+    const saved = getItem("terminal-history");
     return saved ? saved : [];
   });
 
-  // saving every history
-
+  /** save history to localStorage */
   useEffect(() => {
-    setItem("terminal-history", history)
+    setItem("terminal-history", history);
   }, [history]);
 
-  // scrolling effect
+  /** terminal scroll reference */
   const terminalRef = useRef(null);
+
+  /** auto scroll when history updates */
   useEffect(() => {
     if (terminalRef.current) {
-
-      terminalRef.current.scrollTo({
-        top: terminalRef.current.scrollHeight,
-        behavior: "smooth"
-      })
+      terminalRef.current.scrollTop =
+        terminalRef.current.scrollHeight;
     }
-  }, [history])
+  }, [history]);
 
-  // focusing the cursour for typing on click in the terminal anywhere
+  /** input reference */
   const inputRef = useRef(null);
+
+  /** focus terminal input */
   const focusInput = () => {
     inputRef.current?.focus();
-  }
+    inputRef.current?.setSelectionRange(input.length, input.length);
+  };
 
-  /** logic unit of the terminal */
-   const handleCommand = (cmd) => {
-     if (!cmd.trim()) return;
-      setCommandHistory((prev) => [...prev, input]);
-     
-     
-       const action = parseCommand(cmd);
-  
-        if (action.error) {
-      setHistory((prev) => [...prev, `> ${cmd}`, `${action.error}`]);
+  /** -------------------------
+   *  Terminal Logic Unit
+   *  -------------------------
+   */
+  const handleCommand = (cmd) => {
+
+    if (!cmd.trim()) return;
+
+    /** store command for arrow history */
+    setCommandHistory((prev) => [...prev, cmd]);
+
+    const action = parseCommand(cmd);
+
+    if (action.error) {
+      setHistory((prev) => [
+        ...prev,
+        `> ${cmd}`,
+        `${action.error}`,
+      ]);
       return;
     }
-     /** clearing terminal  */
-     if(action.type === "CLEAR_HISTORY") {
-       setHistory([]);
-       return;
-     }
 
+    /** clear terminal */
+    if (action.type === "CLEAR_HISTORY") {
+      setHistory([]);
+      return;
+    }
+
+    /** dispatch action */
     dispatch(action);
+
     setHistory((prev) => [
       ...prev,
       `> ${cmd}`,
       "✔ Command executed",
     ]);
-   };
+  };
 
+  /** -------------------------
+   *  Keyboard Control Unit
+   *  -------------------------
+   */
+  const handleKeyDown = (e) => {
 
-
- /** control unit of the terminal*/
- 
- const handleKeyDown = (e) => {
-
-    if(e.key == "Enter") {
+    /** ENTER */
+    if (e.key === "Enter") {
       handleCommand(input);
       setInput("");
+      setCmdHstryIdx(null);
     }
 
-  // Arrow Up
-    if(e.key == "ArrowUp") {
+    /** ARROW UP */
+    if (e.key === "ArrowUp") {
       e.preventDefault();
+
       setCmdHstryIdx((prev) => {
-        if(commandHistory.length == 0) return null;
-        const newIndex = prev === null ? commandHistory.length-1 : Math.max(prev-1, 0);
+
+        if (commandHistory.length === 0) return null;
+
+        const newIndex =
+          prev === null
+            ? commandHistory.length - 1
+            : Math.max(prev - 1, 0);
+
         setInput(commandHistory[newIndex]);
+
         return newIndex;
-      })
-
+      });
     }
 
-    // Arrow down
-
-    if(e.key === "ArrowDown") {
+    /** ARROW DOWN */
+    if (e.key === "ArrowDown") {
       e.preventDefault();
-       setCmdHstryIdx((prev) => {
-           if(prev === null) return null;
 
-           const newIndex = prev +1 > commandHistory.length? null : prev+1;
+      setCmdHstryIdx((prev) => {
 
-           setInput(newIndex === null ? "" : commandHistory[newIndex]);
-           return newIndex;
-       })
+        if (prev === null) return null;
+
+        const newIndex =
+          prev + 1 >= commandHistory.length
+            ? null
+            : prev + 1;
+
+        setInput(newIndex === null ? "" : commandHistory[newIndex]);
+
+        return newIndex;
+      });
     }
-    
- }
-
+  };
 
   return (
     <TerminalInsides ref={terminalRef} onClick={focusInput}>
-      
-      {/*  displaying all terminail history */}
+
+      {/* terminal history output */}
       <div>
-        {history.map((line, index) => {
-          return <div key={index}>{`>>%>${line}`}</div>
-        })}
+        {history.map((line, index) => (
+          <div key={index}>{line}</div>
+        ))}
       </div>
 
-      {/** taking input and passing to dispatcher */}
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-     
+      {/* command input */}
+      <Input
+        ref={inputRef}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        autoFocus
+      />
+
     </TerminalInsides>
   );
 }
 
+/** Terminal container */
 
 const TerminalInsides = styled.div`
-  
-    background: black;
-    color: #0f0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    font-size: medium;
-    overflow: auto;
-    cursor: pointer;
-  
-`
+  background: black;
+  color: #0f0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-size: medium;
+  overflow: auto;
+  cursor: pointer;
+  padding: 10px;
+  font-family: monospace;
+`;
 
-// input field of terminal 
+/** Terminal input */
 
 const Input = styled.input`
- 
   background: transparent;
   color: #0f0;
   border: none;
   outline: none;
   font-size: medium;
   font-family: monospace;
-
-`
-
+`;
 
 export default Terminal;

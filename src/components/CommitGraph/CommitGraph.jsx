@@ -1,4 +1,4 @@
-import { Stage, Layer, Circle, Line, Text, Group } from "react-konva";
+import { Stage, Layer, Text, Line, Group } from "react-konva";
 import AnimatedNode from "../animations/AnimatedNodes";
 import AnimatedLine from "../animations/AnimatedLine";
 
@@ -6,13 +6,18 @@ import { useRef, useState } from "react";
 import Reset from "../ResetButton/Reset";
 
 function CommitGraph({ commits, branches, HEAD }) {
-  // zoom-draggable navigation
+
   const stageRef = useRef(null);
+
   const [stageState, setStageState] = useState({
     scale: 1,
     x: 0,
     y: 0,
-  })
+  });
+
+  // ===============================
+  // ZOOM HANDLER
+  // ===============================
 
   const handleWheel = (e) => {
     e.evt.preventDefault();
@@ -27,6 +32,7 @@ function CommitGraph({ commits, branches, HEAD }) {
       x: (pointer.x - stage.x()) / oldScale,
       y: (pointer.y - stage.y()) / oldScale,
     };
+
     const newScale =
       e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
 
@@ -34,56 +40,99 @@ function CommitGraph({ commits, branches, HEAD }) {
       scale: newScale,
       x: pointer.x - mousePointTo.x * newScale,
       y: pointer.y - mousePointTo.y * newScale,
-    })
-  }
+    });
+  };
 
-  // reset view
+  // ===============================
+  // RESET VIEW
+  // ===============================
+
   const resetView = () => {
-    const stage = stageState.current;
+    const stage = stageRef.current;
+
     setStageState({
       scale: 1,
       x: 0,
       y: 0,
     });
 
-    stage.scale({ x: 1, y: 1 });
-    stage.position({ x: 0, y: 0 });
-    stage.batchDraw();
+    if (stage) {
+      stage.scale({ x: 1, y: 1 });
+      stage.position({ x: 0, y: 0 });
+      stage.batchDraw();
+    }
   };
 
-  //  Safe fallback
-  const commitList = Object.values(commits || {});
+  // ===============================
+  // SAFE COMMIT LIST
+  // ===============================
 
-  //  Branch X positions
-  const branchX = {};
-  let branchIndex = 0;
+  const commitList = Object.values(commits || {}).sort(
+    (a, b) => Number(a.id) - Number(b.id)
+  );
 
-  Object.keys(branches || {}).forEach((branch) => {
-    branchX[branch] = 100 + branchIndex * 120;
-    branchIndex++;
-  });
+  // ===============================
+  // GIT GRAPH LANE ALGORITHM
+  // ===============================
+
+
+   const laneWidth = 120;
+const baseX = 100;
+const commitSpacing = 80;
+
+const positions = {};
+const branchLane = {};
+const commitLane = {};
+
+let nextLane = 0;
+
+commitList.forEach((commit, index) => {
+
+  let lane;
+
+  // FIRST COMMIT
+  if (!commit.parent) {
+    lane = 0;
+    branchLane[commit.branch] = lane;
+  }
+
+  // NEW BRANCH
+  else if (!(commit.branch in branchLane)) {
+    lane = ++nextLane;
+    branchLane[commit.branch] = lane;
+  }
+
+  // EXISTING BRANCH
+  else {
+    lane = branchLane[commit.branch];
+  }
+
+  commitLane[commit.id] = lane;
+
+  positions[commit.id] = {
+    x: baseX + lane * laneWidth,
+    y: index * commitSpacing + 50,
+  };
+
+});
 
   return (
     <>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <button
+          style={{ cursor: "pointer" }}
+          onClick={resetView}
+        >
+          Reset view
+        </button>
 
-     <div
-      style={
-        {
-          display : "flex",
-          justifyContent : "space-between"
-        }
-      }
-     >
-       <button 
-       style={
-        {
-          cursor : "pointer"
-        }
-       }
-      onClick={resetView}>Reset view</button>
-
-      <Reset/>
-     </div>
+        <Reset />
+      </div>
 
       <Stage
         ref={stageRef}
@@ -99,37 +148,33 @@ function CommitGraph({ commits, branches, HEAD }) {
           setStageState((prev) => ({
             ...prev,
             x: e.target.x(),
-            y: e.target.y()
-          }))
+            y: e.target.y(),
+          }));
         }}
       >
-
         <Layer>
 
-          {/*  DRAW LINES (parent connections) */}
+          {/* =============================
+               DRAW CONNECTION LINES
+          ============================== */}
 
-          {commitList.map((commit, index) => {
-            if (!commit || !commit.parent) return null;
+          {commitList.map((commit) => {
 
-            const parentIndex = commitList.findIndex(
-              (c) => c.id === commit.parent
-            );
+            if (!commit.parent) return null;
 
+            const from = positions[commit.id];
+            const to = positions[commit.parent];
 
-            if (parentIndex === -1) return null;
-
-            const fromX = branchX[commit.branch] || 200;
-            const toX =
-              branchX[commits[commit.parent]?.branch] || 200;
+            if (!from || !to) return null;
 
             return (
               <AnimatedLine
                 key={`line-${commit.id}`}
                 points={[
-                  fromX,
-                  index * 80 + 50,
-                  toX,
-                  parentIndex * 80 + 50,
+                  from.x,
+                  from.y,
+                  to.x,
+                  to.y,
                 ]}
                 stroke="gray"
                 strokeWidth={2}
@@ -137,29 +182,32 @@ function CommitGraph({ commits, branches, HEAD }) {
             );
           })}
 
-          {/*  DRAW COMMITS (circles) */}
+          {/* =============================
+               DRAW COMMIT NODES
+          ============================== */}
+
           {commitList.map((commit, index) => {
-            if (!commit || !commit.id) return null;
+
+            const pos = positions[commit.id];
             const isHead = commit.id === HEAD;
 
-            const x = branchX[commit.branch] || 200;
-            const y = index * 80 + 50;
+            if (!pos) return null;
 
             return (
               <Group key={commit.id}>
+
                 <AnimatedNode
-                  key={commit.id}
-                  x={x}
-                  y={y}
+                  x={pos.x}
+                  y={pos.y}
                   color="blue"
                   stroke={isHead ? "orange" : "black"}
                   strokeWidth={isHead ? 4 : 1}
                 />
 
-                {/* Commit label (C1, C2) */}
+                {/* Commit label */}
                 <Text
-                  x={x - 6}
-                  y={y - 6}
+                  x={pos.x - 6}
+                  y={pos.y - 6}
                   text={`C${index + 1}`}
                   fontSize={10}
                   fill="white"
@@ -167,48 +215,46 @@ function CommitGraph({ commits, branches, HEAD }) {
 
                 {/* Commit message */}
                 <Text
-                  x={x + 30}
-                  y={y - 5}
-                  text={`${commit.message}`}
+                  x={pos.x + 30}
+                  y={pos.y - 5}
+                  text={commit.message || ""}
                   fontSize={15}
                   fontFamily="Poppins"
                 />
 
-                {/*  HEAD POINTER */}
+                {/* HEAD POINTER */}
                 {isHead && (
                   <>
-                    {/* Arrow Line */}
                     <Text
-                      x={x - 10}
-                      y={y - 7}
+                      x={pos.x - 10}
+                      y={pos.y - 7}
                       text=">"
                       fontSize={14}
                       fill="red"
                       fontStyle="bold"
-
                     />
+
                     <Line
-                      points={[x - 60, y, x - 15, y]}
+                      points={[pos.x - 60, pos.y, pos.x - 15, pos.y]}
                       stroke="red"
                       strokeWidth={2}
                     />
 
-                    {/* HEAD Text */}
                     <Text
-                      x={x - 100}
-                      y={y - 7}
+                      x={pos.x - 100}
+                      y={pos.y - 7}
                       text="HEAD"
                       fontSize={14}
                       fill="red"
                       fontStyle="bold"
-
                     />
                   </>
                 )}
-              </Group>
-            )
 
+              </Group>
+            );
           })}
+
         </Layer>
       </Stage>
     </>
