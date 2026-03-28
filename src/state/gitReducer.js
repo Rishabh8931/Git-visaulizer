@@ -13,20 +13,28 @@ export function gitReducer(state, action) {
     // 🔹 ADD
     case "ADD": {
       const fileName = action.payload;
+          
+      //searching for file
+      let file = state.workingDirectory.find((f) => f.name === fileName)
+      let updatedWorkingDir = [...state.workingDirectory];
+       
+      // if file not found
+      if (!file) {
+        file = {
+          name : fileName,
+          status : "staged"
+        }
 
-      if (!fileName) return state;
-
-      const fileExists = state.workingDirectory ? state.workingDirectory.find(
-        (f) => f.name === fileName
-      ) : null;
-
-      if (!fileExists) return state; // file not found
-
-      const updatedFiles = state.workingDirectory.map((file) =>
-        file.name === fileName
-          ? { ...file, status: "staged" }
-          : file
-      );
+         updatedWorkingDir.push(file);
+      }  else {
+          // update status to staged
+          updatedWorkingDir  = state.workingDirectory.map((f) => {
+            f.name === fileName ? {...f, status : "staged"} : f
+          })
+          
+      }
+        
+      
 
       // prevent duplicate staging
       const alreadyStaged = state.stagingArea.some(
@@ -35,10 +43,10 @@ export function gitReducer(state, action) {
 
       return {
         ...state,
-        workingDirectory: updatedFiles,
+        workingDirectory: updatedWorkingDir,
         stagingArea: alreadyStaged
           ? state.stagingArea
-          : [...state.stagingArea, { ...fileExists }],
+          : [...state.stagingArea, { ...file }],
       };
     }
 

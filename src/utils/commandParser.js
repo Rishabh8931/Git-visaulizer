@@ -18,6 +18,7 @@ export function parseCommand(input) {
       return { type: "INIT" };
 
     case "add":
+      if(!parts[2]) return {error : "Nothing specified, nothing added "};
       return { type: "ADD", payload: parts[2] };
 
     case "commit": {

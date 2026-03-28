@@ -4,7 +4,6 @@ export const initialState = {
   workingDirectory: [
     {
       name: "file1.txt",
-      content: "Hello World",
       status: "untracked",
     },
   ],
