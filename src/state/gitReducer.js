@@ -61,7 +61,7 @@ export function gitReducer(state, action) {
       const newCommit = {
         id: newCommitId,
         message: action.payload,
-        parent: state.HEAD, // 👈 key for graph
+        parent: [state.HEAD], // 👈 key for graph
         branch: state.currentBranch, // 👈 key for branching
         files: state.stagingArea.map((f) => ({ ...f })), // deep copy
       };
