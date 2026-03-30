@@ -13,28 +13,28 @@ export function gitReducer(state, action) {
     // 🔹 ADD
     case "ADD": {
       const fileName = action.payload;
-          
+
       //searching for file
       let file = state.workingDirectory.find((f) => f.name === fileName)
       let updatedWorkingDir = [...state.workingDirectory];
-       
+
       // if file not found
       if (!file) {
         file = {
-          name : fileName,
-          status : "staged"
+          name: fileName,
+          status: "staged"
         }
 
-         updatedWorkingDir.push(file);
-      }  else {
-          // update status to staged
-          updatedWorkingDir  = state.workingDirectory.map((f) => {
-            f.name === fileName ? {...f, status : "staged"} : f
-          })
-          
+        updatedWorkingDir.push(file);
+      } else {
+        // update status to staged
+        updatedWorkingDir = state.workingDirectory.map((f) => {
+          return f.name === fileName ? { ...f, status: "staged" } : f
+        })
+
       }
-        
-      
+
+
 
       // prevent duplicate staging
       const alreadyStaged = state.stagingArea.some(
@@ -86,19 +86,19 @@ export function gitReducer(state, action) {
     }
 
     // 🔹 BRANCH
-   case "BRANCH": {
-  const branchName = action.payload;
+    case "BRANCH": {
+      const branchName = action.payload;
 
-  if (!branchName || state.branches[branchName]) return state;
+      if (!branchName || state.branches[branchName]) return state;
 
-  return {
-    ...state,
-    branches: {
-      ...state.branches,
-      [branchName]: state.HEAD, // 👈 correct
-    },
-  };
-}
+      return {
+        ...state,
+        branches: {
+          ...state.branches,
+          [branchName]: state.HEAD, // 👈 correct
+        },
+      };
+    }
 
     // 🔹 CHECKOUT
     case "CHECKOUT": {
@@ -114,9 +114,9 @@ export function gitReducer(state, action) {
         currentBranch: branch,
         HEAD: commitId,
         workingDirectory: commit ? commit.files.map((f) => ({
-            ...f,
-            status: "tracked",
-          })) : state.workingDirectory,
+          ...f,
+          status: "tracked",
+        })) : state.workingDirectory,
 
         stagingArea: [],
       };
@@ -131,6 +131,58 @@ export function gitReducer(state, action) {
           branches: { ...state.branches },
         },
       };
+    }
+
+    // 🔹 MERGE
+    case "MERGE": {
+      const sourceBranch = action.payload;
+      const targetBranch = state.currentBranch;
+      if (!sourceBranch || !state.branches[sourceBranch]) return state;
+      if (sourceBranch === targetBranch) return state;
+
+      const sourceCommitId = state.branches[sourceBranch];
+      const targetCommitId = state.HEAD;
+
+      const newCommitId = Date.now().toString();
+
+      const sourceCommit = state.commits[sourceCommitId];
+      const targeCommit = state.commits[targetCommitId];
+
+      const mergedFiles = [
+        ...(sourceCommit?.files || []),
+        ...(targeCommit?.files || [])
+      ];
+
+
+      const mergeCommit = {
+        id: newCommitId,
+        message: `Merge branch ${sourceBranch}`,
+        parent: [targetCommitId, sourceCommitId],
+        branch: targetBranch,
+        files: mergedFiles,
+      }
+
+      return {
+        ...state,
+        commits: {
+          ...state.commits,
+          [newCommitId]: mergeCommit,
+        },
+        HEAD: newCommitId,
+        branches: {
+          ...state.branches,
+          [targetBranch]: newCommitId,
+        },
+        stagingArea: [],
+        workingDirectory: state.workingDirectory.map((file) => {
+          return {
+            ...file,
+            status: "tracked",
+          }
+        })
+
+      }
+
     }
 
     default:

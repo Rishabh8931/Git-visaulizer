@@ -43,6 +43,11 @@ function CommitGraph({ commits, branches, HEAD }) {
     });
   };
 
+
+
+
+
+
   // ===============================
   // RESET VIEW
   // ===============================
@@ -70,18 +75,67 @@ function CommitGraph({ commits, branches, HEAD }) {
   const commitList = Object.values(commits || {}).sort(
     (a, b) => Number(a.id) - Number(b.id)
   );
+  
+  /*
 
-  // ===============================
-  // GIT GRAPH LANE ALGORITHM
-  // ===============================
+  // ========================================
+  // GIT GRAPH branch based LANE ALGORITHM
+  // ========================================
 
 
-   const laneWidth = 120;
-const baseX = 100;
-const commitSpacing = 80;
+  const laneWidth = 120;
+  const baseX = 100;
+  const commitSpacing = 80;
 
-const positions = {};
-const branchLane = {};
+  const positions = {};
+  const branchLane = {};
+  const commitLane = {};
+
+  let nextLane = 0;
+
+  commitList.forEach((commit, index) => {
+
+    let lane;
+
+    // FIRST COMMIT
+    if (!commit.parent || !commit.parent.length === 0) {
+      lane = 0;
+      branchLane[commit.branch] = lane;
+    }
+
+    // NEW BRANCH
+    else if (!(commit.branch in branchLane)) {
+      lane = ++nextLane;
+      branchLane[commit.branch] = lane;
+    }
+
+    // EXISTING BRANCH
+    else {
+      lane = branchLane[commit.branch];
+    }
+
+    commitLane[commit.id] = lane;
+
+    positions[commit.id] = {
+      x: baseX + lane * laneWidth,
+      y: index * commitSpacing + 50,
+    };
+
+  });
+  */
+
+
+    /*
+   =======================================
+        Parent based Lane algorithem
+   =======================================
+  */ 
+
+    const laneWidth = 120;
+  const baseX = 100;
+  const commitSpacing = 80;
+
+ const positions = {};
 const commitLane = {};
 
 let nextLane = 0;
@@ -91,20 +145,32 @@ commitList.forEach((commit, index) => {
   let lane;
 
   // FIRST COMMIT
-  if (!commit.parent) {
+  if (!commit.parent || commit.parent.length === 0) {
     lane = 0;
-    branchLane[commit.branch] = lane;
   }
 
-  // NEW BRANCH
-  else if (!(commit.branch in branchLane)) {
-    lane = ++nextLane;
-    branchLane[commit.branch] = lane;
+  // NORMAL COMMIT
+  else if (commit.parent.length === 1) {
+
+    const parentId = commit.parent[0];
+    const parentLane = commitLane[parentId];
+    const parentCommit = commits[parentId];
+
+    // 🔥 BRANCH DIVERGENCE DETECTION
+    if (parentCommit && parentCommit.branch !== commit.branch) {
+      lane = ++nextLane;   // new lane
+    } else {
+      lane = parentLane !== undefined ? parentLane : 0;
+    }
+
   }
 
-  // EXISTING BRANCH
+  // MERGE COMMIT
   else {
-    lane = branchLane[commit.branch];
+
+    const firstParent = commit.parent[0];
+    lane = commitLane[firstParent] ?? 0;
+
   }
 
   commitLane[commit.id] = lane;
@@ -115,6 +181,15 @@ commitList.forEach((commit, index) => {
   };
 
 });
+
+  
+
+      
+
+
+
+
+
 
   return (
     <>
@@ -160,27 +235,39 @@ commitList.forEach((commit, index) => {
 
           {commitList.map((commit) => {
 
-            if (!commit.parent) return null;
+            if (!commit.parent || !commit.parent.length === 0) return null;
 
             const from = positions[commit.id];
-            const to = positions[commit.parent];
 
-            if (!from || !to) return null;
+            return commit.parent.map((parentId, index) => {
 
-            return (
-              <AnimatedLine
-                key={`line-${commit.id}`}
-                points={[
-                  from.x,
-                  from.y,
-                  to.x,
-                  to.y,
-                ]}
-                stroke="gray"
-                strokeWidth={2}
-              />
-            );
-          })}
+              const to = positions[parentId];
+
+              if (!from || !to) return null;
+
+              return (
+
+                <AnimatedLine
+                  key={`line-${commit.id}`}
+                  points={[
+                    from.x,
+                    from.y,
+                    to.x,
+                    to.y,
+                  ]}
+                  stroke="gray"
+                  strokeWidth={2}
+                />
+
+              );
+            })
+          }
+
+            )}
+
+
+
+
 
           {/* =============================
                DRAW COMMIT NODES

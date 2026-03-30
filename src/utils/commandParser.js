@@ -3,12 +3,12 @@ import { clearLocalstorage } from "./localStorage";
 
 export function parseCommand(input) {
   const parts = input.trim().split(" ");
-  
-    // clearing terminal
-    if(parts[0] === "clear") {
-       clearLocalstorage("terminal-history");
-       return {type : "CLEAR_HISTORY"}
-    }
+
+  // clearing terminal
+  if (parts[0] === "clear") {
+    clearLocalstorage("terminal-history");
+    return { type: "CLEAR_HISTORY" }
+  }
   if (parts[0] !== "git") {
     return { error: "Command not found" };
   }
@@ -18,7 +18,7 @@ export function parseCommand(input) {
       return { type: "INIT" };
 
     case "add":
-      if(!parts[2]) return {error : "Nothing specified, nothing added "};
+      if (!parts[2]) return { error: "Nothing specified, nothing added " };
       return { type: "ADD", payload: parts[2] };
 
     case "commit": {
@@ -43,6 +43,10 @@ export function parseCommand(input) {
 
     case "push":
       return { type: "PUSH" };
+
+    case "merge":
+      if (!parts[2]) return { error: `${parts[2]} branch does not exists` };
+      return { type: "MERGE", payload: parts[2] };
 
     default:
       return { error: "Command not found" };

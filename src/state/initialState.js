@@ -10,7 +10,7 @@ export const initialState = {
 
   stagingArea: [],
 
-  commits: {},
+  commits: {},  // objects of objects
 
   commitOrder: [],
 
