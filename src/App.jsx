@@ -47,7 +47,7 @@ useEffect(() => {
   return (
     <Container>
       <Section>
-        <Terminal  dispatch = {dispatch} />
+        <Terminal  dispatch = {dispatch} state = {state} />
       </Section>
 
       <Section>

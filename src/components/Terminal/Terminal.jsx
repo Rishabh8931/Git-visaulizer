@@ -1,9 +1,9 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, act } from "react";
 import { styled } from "styled-components";
 import { parseCommand } from "../../utils/commandParser.js";
 import { getItem, setItem } from "../../utils/localStorage.js";
 
-function Terminal({ dispatch }) {
+function Terminal({ dispatch, state }) {
 
   /** input state */
   const [input, setInput] = useState("");
@@ -71,12 +71,35 @@ function Terminal({ dispatch }) {
       return;
     }
 
+
     /** dispatch action */
     dispatch(action);
 
+
+    // showing branches
+      let branchList = [];
+ 
+    if(action.type === "SHOW_BRANCHES") {
+     
+       branchList = Object.keys(state.branches).map((branch) =>{
+  
+        return (
+          branch === state.currentBranch ? 
+          `* ${branch}` 
+          : ` ${branch}`
+        )
+      })
+      
+        
+
+         console.log("branch list:" , branchList)
+
+    }
+
     setHistory((prev) => [
       ...prev,
-      `> ${cmd}`,
+      `${cmd}`,
+      ...branchList,
       "✔ Command executed",
     ]);
   };

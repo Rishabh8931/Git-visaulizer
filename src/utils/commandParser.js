@@ -9,9 +9,21 @@ export function parseCommand(input) {
     clearLocalstorage("terminal-history");
     return { type: "CLEAR_HISTORY" }
   }
+
+  
+// basic validation 
   if (parts[0] !== "git") {
     return { error: "Command not found" };
   }
+
+   // showing branches
+   if(parts.length === 2 && parts[1] === "branch") {
+    
+    return {
+      type : "SHOW_BRANCHES"
+    }
+   }
+
 
   switch (parts[1]) {
     case "init":
