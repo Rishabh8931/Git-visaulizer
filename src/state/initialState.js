@@ -28,6 +28,9 @@ export const initialState = {
       main: null,
     },
     HEAD: null,
+    name: null,
+    url: null,
+    lastFetched: null,
   },
 
   currentPath: "~/project",

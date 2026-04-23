@@ -122,13 +122,99 @@ export function gitReducer(state, action) {
       };
     }
 
+    case "CHECKOUT_NEW_BRANCH": {
+      const branchName = action.payload;
+      if (state.branches[branchName]) return state;
+
+      return {
+        ...state,
+        branches: {
+          ...state.branches,
+          [branchName]: state.HEAD,
+        },
+        currentBranch: branchName,
+      };
+    }
+
     // 🔹 PUSH
     case "PUSH": {
       return {
         ...state,
         remote: {
+          ...state.remote,
           commits: { ...state.commits },
           branches: { ...state.branches },
+          HEAD: state.HEAD,
+        },
+      };
+    }
+
+    case "RESET": {
+      // Simple reset moves HEAD to a specific commit or back one
+      const target = action.payload;
+      let targetCommitId = target;
+
+      if (target === "HEAD~1") {
+        const currentCommit = state.commits[state.HEAD];
+        targetCommitId = currentCommit?.parent?.[0] || state.HEAD;
+      }
+
+      if (!state.commits[targetCommitId]) return state;
+
+      return {
+        ...state,
+        HEAD: targetCommitId,
+        branches: {
+          ...state.branches,
+          [state.currentBranch]: targetCommitId,
+        },
+      };
+    }
+
+    case "RESET_HARD": {
+      const target = action.payload;
+      let targetCommitId = target;
+
+      if (target === "HEAD~1") {
+        const currentCommit = state.commits[state.HEAD];
+        targetCommitId = currentCommit?.parent?.[0] || state.HEAD;
+      }
+
+      const commit = state.commits[targetCommitId];
+      if (!commit) return state;
+
+      return {
+        ...state,
+        HEAD: targetCommitId,
+        branches: {
+          ...state.branches,
+          [state.currentBranch]: targetCommitId,
+        },
+        stagingArea: [],
+        workingDirectory: commit.files.map(f => ({ ...f, status: "tracked" })),
+      };
+    }
+
+    case "REMOTE_ADD": {
+      const { name, url } = action.payload;
+      return {
+        ...state,
+        remote: {
+          ...state.remote,
+          name,
+          url,
+        },
+      };
+    }
+
+    case "FETCH": {
+      return {
+        ...state,
+        // In a real fetch, we'd update remote tracking branches
+        // Here we just simulate syncing some remote state
+        remote: {
+          ...state.remote,
+          lastFetched: Date.now(),
         },
       };
     }

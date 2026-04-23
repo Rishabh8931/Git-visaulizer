@@ -124,20 +124,76 @@ function Terminal({ dispatch, state }) {
       return;
     }
 
+    // Capture state before dispatch for some comparison if needed
+    // or just use current state for info commands
+    
+    if (action.type === "STATUS") {
+      newEntries.push({ text: `On branch ${state.currentBranch}` });
+      if (state.stagingArea.length === 0) {
+        newEntries.push({ text: "nothing to commit, working tree clean" });
+      } else {
+        newEntries.push({ text: "Changes to be committed:", isSuccess: true });
+        state.stagingArea.forEach(f => newEntries.push({ text: `  (use "git restore --staged <file>..." to unstage)` }));
+        state.stagingArea.forEach(f => newEntries.push({ text: `        new file:   ${f.name}`, isSuccess: true }));
+      }
+      setHistory((prev) => [...prev, ...newEntries]);
+      return;
+    }
+
+    if (action.type === "LOG") {
+      const commitList = Object.values(state.commits).reverse();
+      if (commitList.length === 0) {
+        newEntries.push({ text: "No commits yet." });
+      } else {
+        commitList.forEach(c => {
+          newEntries.push({ text: `commit ${c.id}`, isSuccess: true });
+          newEntries.push({ text: `Author: User <user@example.com>` });
+          newEntries.push({ text: `Date: ${new Date(parseInt(c.id)).toLocaleString()}` });
+          newEntries.push({ text: `\n    ${c.message}\n` });
+        });
+      }
+      setHistory((prev) => [...prev, ...newEntries]);
+      return;
+    }
+
+    if (action.type === "SHOW_REMOTES") {
+      if (state.remote.name) {
+        newEntries.push({ text: `${state.remote.name}  ${state.remote.url} (fetch)` });
+        newEntries.push({ text: `${state.remote.name}  ${state.remote.url} (push)` });
+      } else {
+        newEntries.push({ text: "No remotes configured." });
+      }
+      setHistory((prev) => [...prev, ...newEntries]);
+      return;
+    }
+
     dispatch(action);
 
-    let branchList = [];
+    let outputLines = [];
     if (action.type === "SHOW_BRANCHES") {
-      branchList = Object.keys(state.branches).map((branch) => {
+      outputLines = Object.keys(state.branches).map((branch) => {
         return branch === state.currentBranch ? `* ${branch}` : `  ${branch}`;
       });
+    } else if (action.type === "CHECKOUT" || action.type === "CHECKOUT_NEW_BRANCH") {
+      outputLines.push(`Switched to branch '${action.payload}'`);
+    } else if (action.type === "INIT") {
+      outputLines.push("Initialized empty Git repository");
+    } else if (action.type === "REMOTE_ADD") {
+      outputLines.push(`Added remote ${action.payload.name}`);
+    } else if (action.type === "FETCH") {
+      outputLines.push("Fetching from origin...");
+      outputLines.push("✔ Done");
+    } else {
+      outputLines.push("✔ Command executed");
     }
 
-    if (branchList.length > 0) {
-      branchList.forEach(b => newEntries.push({ text: b }));
+    if (outputLines.length > 0) {
+      outputLines.forEach(l => newEntries.push({ 
+        text: l, 
+        isSuccess: !l.includes("Switched") && !l.includes("Initialized") 
+      }));
     }
     
-    newEntries.push({ text: "✔ Command executed", isSuccess: true });
     setHistory((prev) => [...prev, ...newEntries]);
   };
 
