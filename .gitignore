@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#agents skills
+.agents\skills\frontend-design
+skills-lock.json
