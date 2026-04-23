@@ -1,0 +1,31 @@
+export const lightTheme = {
+  background: "#f8fafc",
+  surface: "#ffffff",
+  border: "#e2e8f0",
+  text: "#0f172a",
+  textSecondary: "#64748b",
+  primary: "#0ea5e9",
+  secondary: "#6366f1",
+  accent: "#f43f5e",
+  success: "#10b981",
+  terminalBg: "#1e293b",
+  terminalText: "#f8fafc",
+  graphNode: "#0ea5e9",
+  graphLine: "#0f172a", // High-contrast navy for light theme
+};
+
+export const darkTheme = {
+  background: "#020617",
+  surface: "#0f172a",
+  border: "#1e293b",
+  text: "#f8fafc",
+  textSecondary: "#94a3b8",
+  primary: "#38bdf8",
+  secondary: "#818cf8",
+  accent: "#fb7185",
+  success: "#34d399",
+  terminalBg: "#000000",
+  terminalText: "#10b981",
+  graphNode: "#38bdf8",
+  graphLine: "#22d3ee", // Bright Cyan for dark theme
+};
