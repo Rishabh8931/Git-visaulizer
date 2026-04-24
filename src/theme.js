@@ -11,7 +11,8 @@ export const lightTheme = {
   terminalBg: "#1e293b",
   terminalText: "#f8fafc",
   graphNode: "#0ea5e9",
-  graphLine: "#0f172a", // High-contrast navy for light theme
+  graphLine: "#0f172a",
+  branchColors: ["#0ea5e9", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#6366f1"],
 };
 
 export const darkTheme = {
@@ -27,5 +28,6 @@ export const darkTheme = {
   terminalBg: "#000000",
   terminalText: "#10b981",
   graphNode: "#38bdf8",
-  graphLine: "#22d3ee", // Bright Cyan for dark theme
+  graphLine: "#22d3ee",
+  branchColors: ["#38bdf8", "#a78bfa", "#f472b6", "#fbbf24", "#34d399", "#818cf8"],
 };

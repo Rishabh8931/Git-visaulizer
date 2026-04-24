@@ -39,6 +39,14 @@ function CommitGraph({ commits, branches, HEAD }) {
   const theme = useTheme();
   const stageRef = useRef(null);
 
+  // Map branch names to unique colors from the theme
+  const branchNames = Object.keys(branches || {});
+  const getBranchColor = (branchName) => {
+    const index = branchNames.indexOf(branchName);
+    const colors = theme.branchColors || [theme.primary];
+    return colors[index % colors.length];
+  };
+
   const [stageState, setStageState] = useState({
     scale: 1,
     x: 0,
@@ -48,6 +56,7 @@ function CommitGraph({ commits, branches, HEAD }) {
   const handleWheel = (e) => {
     e.evt.preventDefault();
     const stage = stageRef.current;
+    if (!stage) return;
     const scaleBy = 1.1;
     const oldScale = stage.scaleX();
     const pointer = stage.getPointerPosition();
@@ -140,6 +149,8 @@ function CommitGraph({ commits, branches, HEAD }) {
           {commitList.map((commit) => {
             if (!commit.parent || commit.parent.length === 0) return null;
             const from = positions[commit.id];
+            const branchColor = getBranchColor(commit.branch);
+            
             return commit.parent.map((parentId) => {
               const to = positions[parentId];
               if (!from || !to) return null;
@@ -147,7 +158,7 @@ function CommitGraph({ commits, branches, HEAD }) {
                 <AnimatedLine
                   key={`line-${commit.id}-${parentId}`}
                   points={[from.x, from.y, to.x, to.y]}
-                  stroke={theme.graphLine}
+                  stroke={branchColor}
                   strokeWidth={2}
                   opacity={1}
                 />
@@ -159,14 +170,15 @@ function CommitGraph({ commits, branches, HEAD }) {
             const pos = positions[commit.id];
             const isHead = commit.id === HEAD;
             if (!pos) return null;
+            const branchColor = getBranchColor(commit.branch);
 
             return (
               <Group key={commit.id}>
                 <AnimatedNode
                   x={pos.x}
                   y={pos.y}
-                  color={theme.graphNode}
-                  stroke={isHead ? theme.accent : theme.border}
+                  color={branchColor}
+                  stroke={isHead ? theme.accent : theme.surface}
                   strokeWidth={isHead ? 3 : 1}
                 />
 

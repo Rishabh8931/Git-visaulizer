@@ -2,159 +2,104 @@
 
 ![React](https://img.shields.io/badge/Frontend-React-blue?logo=react)
 ![Vite](https://img.shields.io/badge/Build-Vite-purple?logo=vite)
+![Styled Components](https://img.shields.io/badge/Styles-Styled--Components-db7093?logo=styled-components)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Project-Active-success)
-![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen)
 
 ---
 
 ## 🌟 Overview
 
-**Git Visualizer** is an interactive learning tool that helps students understand how Git works internally through **real-time command execution and visual commit graphs**.
+**Git Visualizer** is a high-performance, interactive learning tool designed to help developers master Git's internal workings. Through a real-time command-line interface and a dynamic, animated commit graph, it bridges the gap between typing commands and understanding state changes.
 
-It simulates a real Git environment with:
-
-- 🖥️ Terminal input
-- 🌿 Branching visualization
-- 🔁 Commit graph (circles & lines)
-- 📦 Staging & working directory
-- 🌍 Remote repository
-
----
-
-## 🎬 Screenshots
-
-### 🖥️ Main UI
-
-![Main UI](./screenshots/main-ui.png)
-
-### 🌿 Branching Visualization
-
-![Branch Graph](./screenshots/branch-graph.png)
-
-### 🎯 HEAD Pointer
-
-![HEAD Pointer](./screenshots/head-pointer.png)
-
-### 🌍 Remote Repository
-
-![Remote](./screenshots/remote.png)
+### What's New?
+- **Modern Glassmorphism UI**: A sleek, professional dashboard with resizable panes.
+- **Dynamic Themes**: Toggle between "Obsidian Night" and "Frosty Day" modes.
+- **Expanded Git Engine**: Support for `status`, `log`, `reset`, `checkout -b`, and more.
+- **Intelligent Terminal**: Inline ghost suggestions and Tab auto-completion.
+- **Smooth Graphing**: Curved branch lines and unique branch coloring.
 
 ---
 
 ## 🎯 Features
 
-- 🖥️ Real Git-like terminal (manual command input)
-- 🌿 Branch creation & switching
-- 🔵 Commit graph with nodes & connections
-- ✨ Animations (commit pop, line draw)
-- 🎯 HEAD pointer visualization
-- 📦 Working directory & staging area
-- 🌍 Remote repository simulation (`git push`)
-- 💾 Persistent state using localStorage
-
----
-
-## 🧠 What You’ll Learn
-
-- How Git tracks changes internally
-- Difference between working directory, staging, and commits
-- How branching works
-- How HEAD moves
-- How local & remote repositories differ
+- **🖥️ Pro Terminal**: manual command input with history (↑/↓), inline suggestions, and Tab completion.
+- **🌿 Advanced Branching**: Smooth visualization of parallel lanes with unique branch colors.
+- **🔵 Curved Commit Graph**: S-curve paths between branch nodes with polished drawing animations.
+- **✨ UX Enhancements**: Resizable panes (drag-to-resize), click-to-copy commit hashes, and persistent layout.
+- **📦 Workspace Management**: Real-time tracking of Working Directory, Staging Area, and Remote Repository.
+- **🌍 Remote Simulation**: `git push`, `git fetch`, and remote tracking visualization.
+- **💾 State Persistence**: Automatically saves your entire Git state and UI preferences to `localStorage`.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- ⚛️ React (Vite)
-- 🎨 react-konva (canvas rendering)
-- 💾 localStorage (state persistence)
+- **⚛️ React 19**: Modern component architecture.
+- **🎨 Styled Components**: Dynamic, theme-aware CSS-in-JS.
+- **🖌️ React-Konva**: Canvas-based rendering for the high-performance commit graph.
+- **⚡ Vite**: Ultra-fast build and development environment.
 
 ---
 
 ## ⚙️ Installation
 
 ```bash
-git clone https://github.com/your-username/git-visualizer.git
+git clone https://github.com/Rishabh8931/Git-visaulizer.git
 cd git-visualizer
 npm install
 npm run dev
+```
 
 ---
-```
+
 ## 🚀 Usage
-- Type commands in terminal:
-- git init
-- git add file1.txt
-- git commit -m "first commit"
 
-- git branch feature
-- git checkout feature
-- git commit -m "feature work"
+### Common Commands & Shorthands
+| Command | Shorthand | Description |
+| :--- | :--- | :--- |
+| `git status` | `gst` | Check staging area |
+| `git add <file>` | `ga <file>` | Stage changes |
+| `git commit -m "msg"`| `gcm "msg"` | Create a new commit |
+| `git log` | `gl` | View commit history |
+| `git checkout -b <br>`| - | Create and switch branch |
+| `git reset --hard` | - | Reset state to previous commit |
 
-- git push
-
-```
+---
 
 ## 🧩 Project Structure
+```text
 src/
  ├── components/
- │   ├── Terminal/
- │   ├── CommitGraph/
- │   ├── WorkingDirectory/
- │   └── RemoteRepository/
- ├── reducers/
+ │   ├── Terminal/           # Intelligent CLI
+ │   ├── CommitGraph/        # Canvas visualization
+ │   ├── WorkingDirectory/   # Local state tracking
+ │   └── RemoteRepository/   # Pushed commits & hashes
+ ├── state/
+ │   ├── gitReducer.js       # Core Git logic
+ │   └── initialState.js     # Default state & schema
  ├── utils/
- └── App.jsx
+ │   ├── commandParser.js    # Shorthand & Command mapping
+ │   └── localStorage.js     # Persistence layer
+ └── App.jsx                 # Theme & Layout provider
+```
 
-docs/
- ├── state.md
- ├── reducer.md
- ├── terminal.md
- ├── commit-graph.md
-  
-  ---
-
-
-  ```
-## future implementations:-
-   - 🔀 Merge commits (multiple parents)
-   - 🔁 Rebase visualization
-   - 🎬 Advanced animations
-   - 🔍 Zoom & drag graph
-   -  👥 Multiplayer / collaboration mode
-  ---
-
-
-  ```
+---
 
 ## 🤝 Contributing
 
-  Contributions are welcome!
-- 1.Fork the repo
-- 2.Create your branch
-- 3.Commit changes
-- 4.Open a PR
+Contributions are welcome!
+1. Fork the repo
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-  See **CONTRIBUTING.md** for details.
+---
 
-   ---
-   ``` 
-  
 ## 📜 License
 
- This project is licensed under the MIT License.
-     ---
-    ```
-## ⭐ Support
-
-   If you found this useful:
-  👉 Star the repo
-  👉 Share with others
+This project is licensed under the MIT License.
 
 ## 🙌 Acknowledgements
-   Inspired by tools like:
-   - GitKraken
-   - GitHub Graph
-   -  SourceTree
+Inspired by tools like **GitKraken**, **GitHub Desktop**, and the need for better Git mental models.

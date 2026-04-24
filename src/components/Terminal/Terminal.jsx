@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import styled from "styled-components";
 import { parseCommand } from "../../utils/commandParser.js";
 import { getItem, setItem } from "../../utils/localStorage.js";
@@ -56,17 +56,44 @@ const HistoryLine = styled.div`
   word-break: break-all;
   opacity: ${(props) => (props.isCommand ? 1 : 0.8)};
   color: ${(props) => (props.isError ? props.theme.accent : props.isSuccess ? props.theme.success : "inherit")};
+  user-select: text;
+  cursor: ${(props) => (props.isHash ? 'copy' : 'text')};
+  
+  &:hover {
+    background: ${(props) => props.isHash ? props.theme.border + '33' : 'transparent'};
+  }
 `;
 
 const PromptWrapper = styled.div`
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  position: relative;
 `;
 
 const PromptPrefix = styled.span`
   color: ${(props) => props.theme.primary};
   font-weight: bold;
+`;
+
+const InputContainer = styled.div`
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+`;
+
+const GhostText = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  color: ${(props) => props.theme.terminalText};
+  opacity: 0.3;
+  pointer-events: none;
+  white-space: pre;
+  font-family: inherit;
+  font-size: inherit;
 `;
 
 const Input = styled.input`
@@ -77,7 +104,38 @@ const Input = styled.input`
   font-family: inherit;
   font-size: inherit;
   flex: 1;
+  z-index: 2;
+  caret-color: ${(props) => props.theme.primary};
 `;
+
+const COMMANDS = [
+  "git init",
+  "git status",
+  "git add",
+  "git commit -m",
+  "git branch",
+  "git checkout",
+  "git checkout -b",
+  "git push",
+  "git log",
+  "git merge",
+  "git reset",
+  "git reset --hard",
+  "git remote",
+  "git remote add",
+  "git fetch",
+  "clear",
+  "gs",
+  "gst",
+  "ga",
+  "gc",
+  "gcm",
+  "gb",
+  "gco",
+  "gp",
+  "gl",
+  "gm",
+];
 
 function Terminal({ dispatch, state }) {
   const [input, setInput] = useState("");
@@ -87,6 +145,11 @@ function Terminal({ dispatch, state }) {
     const saved = getItem("terminal-history");
     return saved ? saved : [];
   });
+
+  const copyToClipboard = (text) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+  };
 
   useEffect(() => {
     setItem("terminal-history", history);
@@ -104,6 +167,13 @@ function Terminal({ dispatch, state }) {
   const focusInput = () => {
     inputRef.current?.focus();
   };
+
+  // Suggestion logic
+  const suggestion = useMemo(() => {
+    if (!input) return "";
+    const match = COMMANDS.find((cmd) => cmd.startsWith(input));
+    return match ? match.slice(input.length) : "";
+  }, [input]);
 
   const handleCommand = (cmd) => {
     if (!cmd.trim()) return;
@@ -124,16 +194,12 @@ function Terminal({ dispatch, state }) {
       return;
     }
 
-    // Capture state before dispatch for some comparison if needed
-    // or just use current state for info commands
-    
     if (action.type === "STATUS") {
       newEntries.push({ text: `On branch ${state.currentBranch}` });
       if (state.stagingArea.length === 0) {
         newEntries.push({ text: "nothing to commit, working tree clean" });
       } else {
         newEntries.push({ text: "Changes to be committed:", isSuccess: true });
-        state.stagingArea.forEach(f => newEntries.push({ text: `  (use "git restore --staged <file>..." to unstage)` }));
         state.stagingArea.forEach(f => newEntries.push({ text: `        new file:   ${f.name}`, isSuccess: true }));
       }
       setHistory((prev) => [...prev, ...newEntries]);
@@ -146,7 +212,7 @@ function Terminal({ dispatch, state }) {
         newEntries.push({ text: "No commits yet." });
       } else {
         commitList.forEach(c => {
-          newEntries.push({ text: `commit ${c.id}`, isSuccess: true });
+          newEntries.push({ text: `commit ${c.id}`, isSuccess: true, isHash: true, raw: c.id });
           newEntries.push({ text: `Author: User <user@example.com>` });
           newEntries.push({ text: `Date: ${new Date(parseInt(c.id)).toLocaleString()}` });
           newEntries.push({ text: `\n    ${c.message}\n` });
@@ -204,6 +270,13 @@ function Terminal({ dispatch, state }) {
       setCmdHstryIdx(null);
     }
 
+    if (e.key === "Tab") {
+      e.preventDefault();
+      if (suggestion) {
+        setInput(input + suggestion);
+      }
+    }
+
     if (e.key === "ArrowUp") {
       e.preventDefault();
       if (commandHistory.length === 0) return;
@@ -236,19 +309,34 @@ function Terminal({ dispatch, state }) {
             isCommand={line.isCommand} 
             isError={line.isError}
             isSuccess={line.isSuccess}
+            isHash={line.isHash}
+            raw={line.raw}
+            onClick={(e) => {
+              if (line.isHash) {
+                e.stopPropagation();
+                copyToClipboard(line.raw);
+                alert(`Copied hash: ${line.raw}`);
+              }
+            }}
           >
             {line.text}
           </HistoryLine>
         ))}
         <PromptWrapper>
           <PromptPrefix>git-viz λ</PromptPrefix>
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            autoFocus
-          />
+          <InputContainer>
+            <GhostText>
+              <span style={{ visibility: "hidden" }}>{input}</span>
+              {suggestion}
+            </GhostText>
+            <Input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoFocus
+            />
+          </InputContainer>
         </PromptWrapper>
       </ScrollArea>
     </Container>

@@ -1,60 +1,46 @@
+# ⚙️ Git Engine (Reducer)
 
-
-```md
-# ⚙️ Git Reducer
-
-Handles all Git operations.
+The reducer is the core processing unit that implements Git's logic. It handles all state transformations based on dispatched actions.
 
 ---
 
-## 🔹 INIT
+## 🔹 Core Operations
 
-Initializes repository.
+### `INIT`
+Sets `initialized: true`. Allows other commands to proceed.
 
----
+### `ADD`
+Moves a file from the `workingDirectory` to the `stagingArea`. Prevent duplicate staging entries for the same file.
 
-## 🔹 ADD
+### `COMMIT`
+- Snapshots the current `stagingArea`.
+- Creates a new commit object with a unique hash (timestamp).
+- Links the new commit to its parent (previous HEAD).
+- Advances the current branch pointer and the `HEAD` pointer.
+- Clears the `stagingArea`.
 
-Stages a file.
+### `CHECKOUT` & `CHECKOUT_NEW_BRANCH`
+- `CHECKOUT`: Switches the `currentBranch` and moves `HEAD` to that branch's latest commit.
+- `CHECKOUT_NEW_BRANCH`: Creates a new branch pointer at the current `HEAD` and switches to it.
 
-- Moves file from workingDirectory → stagingArea
-- Prevents duplicates
+### `MERGE`
+- Creates a special "Merge Commit" with two parents (current HEAD and source branch HEAD).
+- Combines files from both branches.
+- Advances the current branch pointer to the new merge commit.
 
----
-
-## 🔹 COMMIT
-
-Creates a new commit.
-
-- Generates unique ID
-- Stores parent (previous commit)
-- Moves HEAD forward
-- Clears staging area
-
----
-
-## 🔹 BRANCH
-
-Creates new branch pointer.
+### `RESET` & `RESET_HARD`
+- `RESET`: Moves the current branch pointer and `HEAD` to a specific commit.
+- `RESET_HARD`: Same as reset, but also clears the `stagingArea` and reverts the `workingDirectory` to match the target commit's files.
 
 ---
 
-## 🔹 CHECKOUT
+## 🔹 Remote Operations
 
-Switches branch.
+### `PUSH`
+Copies all local commits and branch pointers to the `remote` state.
 
-- Updates currentBranch
-- Moves HEAD
-- Updates workingDirectory
+### `REMOTE_ADD`
+Links a remote name and URL to the repository state.
 
----
-
-## 🔹 PUSH
-
-Copies local commits to remote.
-
----
-
-## 🎯 Key Idea
-
-Reducer acts like Git engine.
+### `FETCH`
+Simulates a sync operation by updating the `lastFetched` timestamp and ensuring remote state is current.

@@ -88,8 +88,27 @@ const CommitHash = styled.span`
   font-weight: 600;
   font-size: 0.75rem;
   background: ${(props) => props.theme.background};
-  padding: 0.1rem 0.4rem;
+  padding: 0.2rem 0.5rem;
   border-radius: 4px;
+  cursor: copy;
+  transition: all 0.2s;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  &:hover {
+    background: ${(props) => props.theme.secondary};
+    color: white;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  span.label {
+    opacity: 0.6;
+    font-size: 0.65rem;
+  }
 `;
 
 const CommitMessage = styled.span`
@@ -101,6 +120,11 @@ const CommitMessage = styled.span`
 
 function RemoteRepository({ state }) {
   const commits = Object.values(state.remote.commits || {});
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    alert(`Copied hash: ${text}`);
+  };
 
   return (
     <Container>
@@ -134,7 +158,13 @@ function RemoteRepository({ state }) {
           <CommitList>
             {commits.map((c, i) => (
               <CommitItem key={i}>
-                <CommitHash>C{i + 1}</CommitHash>
+                <CommitHash 
+                  title="Click to copy full hash" 
+                  onClick={() => copyToClipboard(c.id)}
+                >
+                  <span className="label">C{i + 1}</span>
+                  {c.id.substring(c.id.length - 6)}
+                </CommitHash>
                 <CommitMessage>{c.message}</CommitMessage>
               </CommitItem>
             ))}
